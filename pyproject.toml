@@ -1,0 +1,51 @@
+# Install:
+#   1. Install PyTorch for either AMD or Nvidia GPUs:
+#      ROCm (AMD):   pip install torch --index-url https://download.pytorch.org/whl/rocm6.4
+#      CUDA (Nvidia): pip install torch
+#      CPU only:      pip install torch
+#   2. pip install -e ".[dev]"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rl-from-scratch"
+version = "0.1.0"
+description = "Tabular Q-learning, DQN, REINFORCE and PPO implemented from first principles in PyTorch."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "MIT"
+authors = [{ name = "Bradley Hewitt" }]
+
+dependencies = [
+    # torch is installed separately. Follow instructions at top of file.
+    "gymnasium[box2d]>=1.0",
+    "numpy>=1.26",
+    "wandb>=0.17",
+    "pyyaml>=6.0",
+    "matplotlib>=3.8",
+    "imageio>=2.34",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
+
+[tool.setuptools]
+packages = ["algorithms", "common"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
