@@ -5,6 +5,7 @@ import random
 import numpy as np
 import torch
 
+
 def set_seed(seed: int, env=None) -> None:
     """Seed Python, NumPy and torch"""
     random.seed(seed)

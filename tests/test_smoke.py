@@ -1,3 +1,6 @@
+from common.seed import set_seed
+
+
 def test_placeholder():
     pass
 
