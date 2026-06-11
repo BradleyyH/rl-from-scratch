@@ -3,7 +3,7 @@ This journal logs the decisions made, problems encountered and my solutions to t
 
 ---
 
-## Phase 0 Setup
+## Phase 0 Setup (09/06/26 - 11/06/26)
 
 ### Environment
 - Developed using Python 3.13 for support with ROCm 6.4, setup in a '.venv' virtual environment
@@ -22,3 +22,5 @@ This journal logs the decisions made, problems encountered and my solutions to t
 - 'configs/' : one YAML config per algorithm/environment pair
 - 'results/' : store reward curves and GIFs
 - 'tests/' : testing
+
+Started reading through 'Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto'
