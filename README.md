@@ -13,10 +13,8 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 
 ### Planned
 
-- [ ] **Tabular Q-learning** — FrozenLake-v1 (`is_slippery=True`, 8×8)
-- [ ] **DQN** — CartPole-v1
-- [ ] REINFORCE — CartPole-v1
-- [ ] PPO — LunarLander-v3
+- [ ] **Tabular Q-learning** - FrozenLake-v1
+- [ ] **DQN** - CartPole-v1
 
 ## Installation
 
