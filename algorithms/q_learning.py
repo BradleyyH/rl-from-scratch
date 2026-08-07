@@ -30,6 +30,48 @@ def train(seed: int = SEED) -> None:
     n_actions = env.action_space.n
     q_table = np.zeros((n_states, n_actions))
 
+    # Epsilon decay schedule
+    decay_episodes = int(N_EPISODES * EPSILON_DECAY)
+    epsilon = EPSILON_START
+
+    for episode in range(N_EPISODES):
+        state, _ = env.reset()
+        done = False
+        total_reward = 0
+
+        while not done:
+            # Epsilon-greedy action selection
+            if np.random.random() < epsilon:
+                action = env.action_space.sample() # Exploration
+            else:
+                action = int(np.argmax(q_table[state])) # Exploitation
+
+            # Take action, observe the reward, and next state
+            next_state, reward, terminated, truncated, _= env.step(action)
+            done = terminated or truncated # End if episode ends naturally (goal or fell in hole) or time limit is reached
+
+            # Q-learning update (Bellman Equation)
+            # If fall in hole, episode terminates, so there is no future value, so zero it out: (1 - terminated)
+            td_error = reward + GAMMA * np.max(q_table[next_state]) * (1 - terminated) - q_table[state, action]
+            q_table[state, action] += ALPHA * td_error
+
+            state = next_state
+            total_reward += reward
+
+        # Decay epsilon linearly
+        if episode < decay_episodes:
+            epsilon = EPSILON_START - (EPSILON_START - EPSILON_END) * (episode / decay_episodes)
+        else:
+            epsilon = EPSILON_END
+
+        # Log every 500 episodes to W&B to show progression
+        if episode % 500 == 0:
+            print(f"Episode {episode}, Epsilon:{epsilon:.3f}, Reward: {total_reward}")
+            wandb.log({"episode": episode, "reward": total_reward, "epsilon": epsilon})
+
+    env.close()
+    wandb.finish()
+
     # Initialise W&B - Trace every result back to its exact configuration
     wandb.init(
         project="rl-from-scratch",

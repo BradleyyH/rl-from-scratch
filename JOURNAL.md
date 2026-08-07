@@ -34,3 +34,6 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - A discount factor y = 0.99 chosen to value future rewards highly, which is useful for FrozenLake where the reward is only received at the end.
 - Q-table initialised to zeros (64x4 for 8x8 FrozenLake with 4 actions)
 - W&B configured to log seed and all hyperparameters per run, so that every result can be traced back to its exact configuration.
+- ε-greedy policy for random action if ε > random number (explore), otherwise take action with the highest Q-value (exploitation).
+- TD error zeros out on termination via (1 - terminated) to prevent future rewards
+- ε decays linearly over 80% of training, then remains at 0.01
