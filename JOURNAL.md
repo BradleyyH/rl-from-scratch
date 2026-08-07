@@ -24,3 +24,13 @@ This journal logs the decisions made, problems encountered and my solutions to t
 - 'tests/' : testing
 
 Currently reading through 'Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto'
+
+## Phase 1: Algorithm Implementation
+### 1.1 Q-Learning
+- FrozenLake-v1 chosen as the environment, on an 8x8 grid, with 'is_slippery' set to True.
+- Q-learning will be the first algorithm implemented as it requires no neural network, focusing only on the core RL loop (state, action, reward, next state).
+- The Bellman equation defines the optimal Q-table, where the Q-learning update rule moves towards it incrementally using TD error scaled by the learning rate alpha.
+- ε-greedy exploration used, where ε decays linearly from 1.0 to 0.01 over 80% of training. This balances exploration early on, with exploitation later.
+- A discount factor y = 0.99 chosen to value future rewards highly, which is useful for FrozenLake where the reward is only received at the end.
+- Q-table initialised to zeros (64x4 for 8x8 FrozenLake with 4 actions)
+- W&B configured to log seed and all hyperparameters per run, so that every result can be traced back to its exact configuration.
