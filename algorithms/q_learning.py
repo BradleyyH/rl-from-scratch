@@ -1,8 +1,9 @@
 """Tabular Q-Learning on FrozenLake-v1."""
 
-import numpy as np
 import gymnasium as gym
+import numpy as np
 import wandb
+
 from common.seed import set_seed
 
 # Hyperparameters
@@ -29,6 +30,23 @@ def train(seed: int = SEED) -> None:
     n_states = env.observation_space.n
     n_actions = env.action_space.n
     q_table = np.zeros((n_states, n_actions))
+
+    # Initialise W&B - Trace every result back to its exact configuration
+    wandb.init(
+        project="rl-from-scratch",
+        name=f"q-learning-seed-{seed}",
+        config={
+            "algorithm": "Q-learning",
+            "env": ENV_ID,
+            "seed": seed,
+            "alpha": ALPHA,
+            "gamma": GAMMA,
+            "epsilon_start": EPSILON_START,
+            "epsilon_end": EPSILON_END,
+            "epsilon_decay": EPSILON_DECAY,
+            "n_episodes": N_EPISODES
+        }
+    )
 
     # Epsilon decay schedule
     decay_episodes = int(N_EPISODES * EPSILON_DECAY)
@@ -72,19 +90,5 @@ def train(seed: int = SEED) -> None:
     env.close()
     wandb.finish()
 
-    # Initialise W&B - Trace every result back to its exact configuration
-    wandb.init(
-        project="rl-from-scratch",
-        name=f"q-learning-seed-{seed}",
-        config={
-            "algorithm": "Q-learning",
-            "env": ENV_ID,
-            "seed": seed,
-            "alpha": ALPHA,
-            "gamma": GAMMA,
-            "epsilon_start": EPSILON_START,
-            "epsilon_end": EPSILON_END,
-            "epsilon_decay": EPSILON_DECAY,
-            "n_episodes": N_EPISODES
-        }
-    )
+if __name__ == "__main__":
+    train(seed=SEED)
