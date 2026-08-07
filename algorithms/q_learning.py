@@ -17,7 +17,7 @@ EPSILON_END = 0.01
 EPSILON_DECAY = 0.8
 SEED = 1607
 
-def train(seed: int = SEED) -> None:
+def train(seed: int = SEED) -> np.ndarray:
     """Train Q-learning agent on FrozenLake."""
     set_seed(seed)
 
@@ -89,6 +89,31 @@ def train(seed: int = SEED) -> None:
 
     env.close()
     wandb.finish()
+    return q_table
+
+
+def evaluate(q_table: np.ndarray, seed: int = SEED, n_episodes: int = 1000) -> float:
+    """Evaluate greedily over n episodes once training is complete to measure true learned performance (no ε)."""
+    set_seed(seed)
+    env = gym.make(ENV_ID, is_slippery=True, map_name=f"{MAP_SIZE}x{MAP_SIZE}")
+    set_seed(seed, env)
+
+    successes = 0
+    for _ in range(n_episodes):
+        state, _ = env.reset()
+        done = False
+        while not done:
+            action = int(np.argmax(q_table[state])) # Only greedy (no exploration)
+            state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+        if reward == 1.0: # Goal is reached
+            successes += 1
+
+    env.close()
+    success_rate = successes / n_episodes
+    print(f"Success Rate: {success_rate:.1%} over {n_episodes} episodes")
+    return success_rate
 
 if __name__ == "__main__":
-    train(seed=SEED)
+    q_table = train(seed=SEED)
+    success_rate = evaluate(q_table, seed=SEED)

@@ -40,3 +40,4 @@ Seed will stay at 1607 throughout.
 - ε-greedy policy for random action if ε > random number (explore), otherwise take action with the highest Q-value (exploitation).
 - TD error zeros out on termination via (1 - terminated) to prevent future rewards
 - ε decays linearly over 80% of training, then remains at 0.01
+- Evaluation function uses greedy policy (no ε) over n episodes to measure true learned performance.
