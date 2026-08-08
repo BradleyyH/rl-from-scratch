@@ -374,7 +374,6 @@ logs/
 
 # Matplotlib outputs
 figures/
-*.png
 *.pdf
 
 
