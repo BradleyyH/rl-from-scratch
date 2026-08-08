@@ -9,7 +9,7 @@ from common.seed import set_seed
 # Hyperparameters
 ENV_ID = "FrozenLake-v1"
 MAP_SIZE = 8
-N_EPISODES = 30_000
+N_EPISODES = 100_000
 ALPHA = 0.1
 GAMMA = 0.99
 EPSILON_START = 1.0
@@ -35,6 +35,7 @@ def train(seed: int = SEED) -> np.ndarray:
     wandb.init(
         project="rl-from-scratch",
         name=f"q-learning-seed-{seed}",
+        reinit=True,
         config={
             "algorithm": "Q-learning",
             "env": ENV_ID,
@@ -53,7 +54,7 @@ def train(seed: int = SEED) -> np.ndarray:
     epsilon = EPSILON_START
 
     for episode in range(N_EPISODES):
-        state, _ = env.reset()
+        state, _ = env.reset(seed=seed + episode)
         done = False
         total_reward = 0
 
@@ -90,6 +91,9 @@ def train(seed: int = SEED) -> np.ndarray:
     print(f"Non-zero Q-table entries: {np.count_nonzero(q_table)}/{q_table.size}")
 
     env.close()
+
+    success_rate = evaluate(q_table, seed=seed)
+    wandb.log({"success_rate": success_rate})
     wandb.finish()
     return q_table
 

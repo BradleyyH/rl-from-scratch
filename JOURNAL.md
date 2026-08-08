@@ -47,4 +47,15 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 
 ## Possible Improvements
 - Q-learning's convergence guarantee requires a decaying learning rate (Robbins-Monro conditions). A fixed decay rate here to be chnaged to visit-count based decay α = 1/(1 + N(s,a)).
-- Further increase episodes due to the difficulty of 8x8 slippery FrozenLake.  
+- Further increase episodes due to the difficulty of 8x8 slippery FrozenLake.
+
+## Visit-Count Learning Rate Second Attempt
+- 1/(1+N(s,a)) decays too aggressively for bootstrapped TD learning, and performance worsened to ~24% success rate over 100,000 episodes.
+- Frequently visited start states freeze within the first ~100 episodes while Q-values are noise, locking in bad estimates.
+- To fix this, I have added a floor α = max(0.05, 1/(1+N(s,a))) to prevent premature freezing
+- Performance significantly improved to a ~61% average success rate but no better than before a decaying learning rate was added. Due to this, I reverted back to a fixed alpha value.
+
+## Conclusion
+- Despite numerous attempts at tuning hyperparameters, the ceiling for tabular Q-learning on this environment came at around ~62%. With is_slippery=True, the task became stochatic, with a 1/3 chance of sliding sideways, and so even the optimal action fails randomly, creating a hard ceiling.
+- A fixed alpha value (α = 0.1) with 100k episodes performed equally or better than all other theoretically motivated alternatives.
+- This motivates the use of function approximation in DQN, which can handle more complex environments.
