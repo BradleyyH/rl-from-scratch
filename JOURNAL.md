@@ -39,3 +39,12 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - TD error zeros out on termination via (1 - terminated) to prevent future rewards
 - ε decays linearly over 80% of training, then remains at 0.01
 - Evaluation function uses greedy policy (no ε) over n episodes to measure true learned performance.
+
+## Results for Q-learning
+- Achieved an average of approximately 59% success rate across multiple seeds and hyperparameter combinations on FrozenLake-V1 8x8 (is_slippery=True).
+- Non-zero Q-table entries: 209/256 shows good state coverage confirming that exploration was not the limiting factor here.
+- Performance plateau may be attributed to environment stochasticity due to is_slippery=True, (1/3 chance of sliding sideways).
+
+## Possible Improvements
+- Q-learning's convergence guarantee requires a decaying learning rate (Robbins-Monro conditions). A fixed decay rate here to be chnaged to visit-count based decay α = 1/(1 + N(s,a)).
+- Further increase episodes due to the difficulty of 8x8 slippery FrozenLake.  

@@ -87,6 +87,8 @@ def train(seed: int = SEED) -> np.ndarray:
             print(f"Episode {episode}, Epsilon:{epsilon:.3f}, Reward: {total_reward}")
             wandb.log({"episode": episode, "reward": total_reward, "epsilon": epsilon})
 
+    print(f"Non-zero Q-table entries: {np.count_nonzero(q_table)}/{q_table.size}")
+
     env.close()
     wandb.finish()
     return q_table
