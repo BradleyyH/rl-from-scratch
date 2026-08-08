@@ -17,7 +17,7 @@ def run_experiments() -> None:
         success_rates.append(success_rate)
 
     success_rates = np.array(success_rates)
-    print(f"\n Results")
+    print("\n Results")
     print(f"Seeds: {SEEDS}")
     print(f"Success rates: {[f'{r:.1%}' for r in success_rates]}")
     print(f"Mean: {np.mean(success_rates):.1%}")
