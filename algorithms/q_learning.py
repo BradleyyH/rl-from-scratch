@@ -24,6 +24,7 @@ def train(seed: int = SEED) -> np.ndarray:
     # Initialise environment
     env = gym.make(ENV_ID, is_slippery=True, map_name=f"{MAP_SIZE}x{MAP_SIZE}") # 64 rows (8x8)
     set_seed(seed, env)
+    env.action_space.seed(seed)
 
     # Initialise Q-table with zeros
     # (.n is an attribute of Gymnasium's Discrete space class to give number of possible values)
