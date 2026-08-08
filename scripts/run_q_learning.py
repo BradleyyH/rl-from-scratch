@@ -42,17 +42,33 @@ def plot_heatmap(q_table: np.ndarray) -> None:
     plt.savefig("results/q_learning_heatmap.png")
     plt.close()
 
+def plot_learning_curve(rolling_log: list[tuple[int, float]]) -> None:
+    """Plot rolling success rate over training episodes."""
+    fig, ax = plt.subplots(figsize=(6, 4))
+    episodes, rolling_success_rate = zip(*rolling_log, strict=True)
+
+    ax.plot(episodes, rolling_success_rate, color="blue")
+    ax.set_xlabel("Episode")
+    ax.set_ylabel("Rolling success rate (from last 500 episodes)")
+    ax.set_title("Q-learning on FrozenLake-v1 learning curve")
+    ax.set_ylim(0, 1)
+
+    plt.tight_layout()
+    plt.savefig("results/q_learning_learning_curve.png")
+    plt.close()
+
 def run_experiments() -> None:
     """Train and evaluate Q-learning across multiple seeds"""
     success_rates=[]
-
     last_q_table = None
+    last_rolling_log = None
     for seed in SEEDS:
         print(f"\n Seed {seed}")
-        q_table = train(seed=seed)
+        q_table, rolling_log = train(seed=seed)
         success_rate = evaluate(q_table, seed=seed)
         success_rates.append(success_rate)
         last_q_table = q_table
+        last_rolling_log = rolling_log
 
     success_rates = np.array(success_rates)
     print("\n Results")
@@ -63,6 +79,7 @@ def run_experiments() -> None:
 
     plot_success_rates(success_rates)
     plot_heatmap(last_q_table)
+    plot_learning_curve(last_rolling_log)
 
 if __name__ == "__main__":
     run_experiments()

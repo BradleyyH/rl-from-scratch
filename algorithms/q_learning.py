@@ -43,7 +43,7 @@ def save_gif(q_table: np.ndarray, seed: int, episode: int, epsilon: float) -> No
     imageio.mimsave(path, frames, fps=4)
     print(f"Saved GIF: {path}")
 
-def train(seed: int = SEED) -> np.ndarray:
+def train(seed: int = SEED) -> tuple[np.ndarray, list[float]]:
     """Train Q-learning agent on FrozenLake."""
     set_seed(seed)
 
@@ -80,6 +80,9 @@ def train(seed: int = SEED) -> np.ndarray:
     decay_episodes = int(N_EPISODES * EPSILON_DECAY)
     epsilon = EPSILON_START
 
+    recent_rewards = [] # Rolling success rate
+    rolling_log = []
+
     for episode in range(N_EPISODES):
         state, _ = env.reset(seed=seed + episode)
         done = False
@@ -104,6 +107,11 @@ def train(seed: int = SEED) -> np.ndarray:
             state = next_state
             total_reward += reward
 
+        recent_rewards.append(total_reward)
+
+        if len(recent_rewards) > 500:
+            recent_rewards.pop(0)
+
         # Decay epsilon linearly
         if episode < decay_episodes:
             epsilon = EPSILON_START - (EPSILON_START - EPSILON_END) * (episode / decay_episodes)
@@ -116,8 +124,9 @@ def train(seed: int = SEED) -> np.ndarray:
 
         # Log every 500 episodes to W&B to show progression
         if episode % 500 == 0:
+            rolling_log.append((episode, np.mean(recent_rewards)))
             print(f"Episode {episode}, Epsilon:{epsilon:.3f}, Reward: {total_reward}")
-            wandb.log({"episode": episode, "reward": total_reward, "epsilon": epsilon})
+            wandb.log({"episode": episode, "reward": total_reward, "epsilon": epsilon, "rolling_success_rate": np.mean(recent_rewards)})
 
     print(f"Non-zero Q-table entries: {np.count_nonzero(q_table)}/{q_table.size}")
 
@@ -126,7 +135,7 @@ def train(seed: int = SEED) -> np.ndarray:
     success_rate = evaluate(q_table, seed=seed)
     wandb.log({"success_rate": success_rate})
     wandb.finish()
-    return q_table
+    return q_table, rolling_log
 
 
 def evaluate(q_table: np.ndarray, seed: int = SEED, n_episodes: int = 1000) -> float:

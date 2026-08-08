@@ -55,7 +55,13 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - To fix this, I have added a floor α = max(0.05, 1/(1+N(s,a))) to prevent premature freezing
 - Performance significantly improved to a ~61% average success rate but no better than before a decaying learning rate was added. Due to this, I reverted back to a fixed alpha value.
 
+## Learning Curve Analysis
+- Added rolling success rate to track the learning progression
+- All 5 seeds follow a near identical curve confirming reproducibility
+- From episodes 0-40,000, we see the agent exploring randomly, with the goal rarely found (also seen in the video/gif). From episodes 40,000-80,000, we see a steady improvement as Q-values propagate from goal. Finally from episodes 80,000 to 100,000, we see a convergence at ~57%.
+
 ## Conclusion
 - Despite numerous attempts at tuning hyperparameters, the ceiling for tabular Q-learning on this environment came at around ~62%. With is_slippery=True, the task became stochatic, with a 1/3 chance of sliding sideways, and so even the optimal action fails randomly, creating a hard ceiling.
+- The learning curve shows us that the agent is steadily learning, with performance rising from near zero to ~57%, but platuaus well before the theoretical optimum.
 - A fixed alpha value (α = 0.1) with 100k episodes performed equally or better than all other theoretically motivated alternatives.
 - This motivates the use of function approximation in DQN, which can handle more complex environments.
