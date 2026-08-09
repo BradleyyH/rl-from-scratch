@@ -61,7 +61,7 @@ def _update(
 
 def evaluate(net: nn.Module, seed: int = SEED, n_episodes: int = 10) -> float:
     """Evaluate the trained agent greedily over n episodes, returning mean reward."""
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     env = gym.make(ENV_ID)
     set_seed(seed, env)
     env.action_space.seed(seed)
@@ -99,7 +99,7 @@ def train(seed: int = SEED) -> nn.Module:
     state_dim = env.observation_space.shape[0] # For this env there are 4
     action_dim = env.action_space.n # For this env, 2
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     online_net = MLP(state_dim, action_dim).to(device)
     target_net = MLP(state_dim, action_dim).to(device)
     target_net.load_state_dict(online_net.state_dict())
