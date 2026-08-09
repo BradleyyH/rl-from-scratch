@@ -102,3 +102,8 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - The learning curves will be more stable than in Q-learning.
 - Faster convergence, with hopefully DQN solving this problem within 300 episodes.
 
+### _update Function
+- Takes a random batch of 64 transitions to sample from the replay buffer
+- Loss computed as MSE between predicted Q-values and TD targets, backpropagated through the online network
+- Future values zeroes on termination, like done in the Q-learning implementation
+

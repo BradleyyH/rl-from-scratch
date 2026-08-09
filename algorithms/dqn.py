@@ -23,6 +23,45 @@ EPSILON_DECAY = 0.995
 TARGET_UPDATE_FREQ = 10
 SEED = 1607
 
+def _update(
+        online_net: nn.Module,
+        target_net: nn.Module,
+        buffer: ReplayBuffer,
+        optimiser: torch.optim.Optimizer,
+        device: torch.device,
+) -> float:
+    """Sample a batch from the buffer and update the online network."""
+    states, actions, rewards, next_states, terminateds = buffer.sample(BATCH_SIZE)
+
+    # Convert to tensors for the nn's and move to GPU for computations
+    states = torch.FloatTensor(states).to(device)
+    actions = torch.LongTensor(actions).to(device)
+    rewards = torch.FloatTensor(rewards).to(device)
+    next_states = torch.FloatTensor(next_states).to(device)
+    terminateds = torch.FloatTensor(terminateds).to(device)
+
+    # Current Q-values from the online network
+    # Unsqueeze(1) to reshape actions from (batch,) to (batch, 1) for gather
+    # Use .gather to pick the Q-value for the action actually taken
+    # squeeze(1) removes extra dimension, back to shape (batch,)
+    current_q = online_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+
+    # TD targets from target network
+    with torch.no_grad():
+        next_q = target_net(next_states).max(1).values # Best Q-value across all actions in next state
+        target_q = rewards + GAMMA * next_q * (1 - terminateds) # If episode ends, zero out future values
+
+    # Compute loss and update
+    loss = nn.functional.mse_loss(current_q, target_q) # The mean squared error between predicted and target Q-values
+    optimiser.zero_grad()
+    loss.backward() # Backpropagate
+    optimiser.step() # Update network using computed gradients
+
+    return loss.item()
+
+
+
+
 def train(seed: int = SEED) -> nn.Module:
     """Train DQN agent on CartPole."""
     set_seed(seed)
@@ -74,13 +113,13 @@ def train(seed: int = SEED) -> nn.Module:
         total_reward = 0
 
         while not done:
-        # Epsilon-greedy action selection
-        if np.random.random() < epsilon:
-            action = env.action_space.sample()
-        else:
-            with torch.no_grad():
-                state_tensor = torch.FloatTensor(state).unsqueeze(0).to(device)
-                action = online_net(state_tensor).argmax().item()
+            # Epsilon-greedy action selection
+            if np.random.random() < epsilon:
+                action = env.action_space.sample()
+            else:
+                with torch.no_grad():
+                    state_tensor = torch.FloatTensor(state).unsqueeze(0).to(device)
+                    action = online_net(state_tensor).argmax().item()
 
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
