@@ -40,28 +40,50 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - ε decays linearly over 80% of training, then remains at 0.01
 - Evaluation function uses greedy policy (no ε) over n episodes to measure true learned performance.
 
-## Results for Q-learning
+### Results for Q-learning
 - Achieved an average of approximately 59% success rate across multiple seeds and hyperparameter combinations on FrozenLake-V1 8x8 (is_slippery=True).
 - Non-zero Q-table entries: 209/256 shows good state coverage confirming that exploration was not the limiting factor here.
 - Performance plateau may be attributed to environment stochasticity due to is_slippery=True, (1/3 chance of sliding sideways).
 
-## Possible Improvements
+### Possible Improvements
 - Q-learning's convergence guarantee requires a decaying learning rate (Robbins-Monro conditions). A fixed decay rate here to be chnaged to visit-count based decay α = 1/(1 + N(s,a)).
 - Further increase episodes due to the difficulty of 8x8 slippery FrozenLake.
 
-## Visit-Count Learning Rate Second Attempt
+### Visit-Count Learning Rate Second Attempt
 - 1/(1+N(s,a)) decays too aggressively for bootstrapped TD learning, and performance worsened to ~24% success rate over 100,000 episodes.
 - Frequently visited start states freeze within the first ~100 episodes while Q-values are noise, locking in bad estimates.
 - To fix this, I have added a floor α = max(0.05, 1/(1+N(s,a))) to prevent premature freezing
 - Performance significantly improved to a ~61% average success rate but no better than before a decaying learning rate was added. Due to this, I reverted back to a fixed alpha value.
 
-## Learning Curve Analysis
+### Learning Curve Analysis
 - Added rolling success rate to track the learning progression
 - All 5 seeds follow a near identical curve confirming reproducibility
 - From episodes 0-40,000, we see the agent exploring randomly, with the goal rarely found (also seen in the video/gif). From episodes 40,000-80,000, we see a steady improvement as Q-values propagate from goal. Finally from episodes 80,000 to 100,000, we see a convergence at ~57%.
 
-## Conclusion
+### Conclusion
 - Despite numerous attempts at tuning hyperparameters, the ceiling for tabular Q-learning on this environment came at around ~62%. With is_slippery=True, the task became stochatic, with a 1/3 chance of sliding sideways, and so even the optimal action fails randomly, creating a hard ceiling.
 - The learning curve shows us that the agent is steadily learning, with performance rising from near zero to ~57%, but platuaus well before the theoretical optimum.
 - A fixed alpha value (α = 0.1) with 100k episodes performed equally or better than all other theoretically motivated alternatives.
 - This motivates the use of function approximation in DQN, which can handle more complex environments.
+
+### 1.2 DQN Implementation
+- CartPole-v1 chosen as the environment. It has a continuous state space (position, velocity, angle, angular velocity). A Q-table would not be able to represent the infinite possible states.
+- DQN replaces the Q-table with a neural network that approximates the Q-values for any input state.
+- There are two additions over Q-learning that make it more stable:
+1. A replay buffer that stores past transitions and samples random batches to break correlation between consecutive updates.
+2. A target network which is a frozen copy of the online network updated every N steps. This stabilises TD targets during training.
+
+### Replay Buffer
+- I implemented this as a fixed-size circular deque
+- This stores transitions: (state, action, reward, next_state, terminated)
+- When full, the oldest transitions are discarded automatically
+- Random batch sampling breaks any temporal correlations between consecutive experiences
+
+### Neural network
+- Implemented a multi-layer perceptron for Q-value approximation
+- It follows: input -> 128 -> 128 -> output, with ReLU activations between hidden layers.
+- The input dimension sizes is 4 (CartPole state: position, velocity, angle, angular velocity)
+- The output dimension size is 2 (one Q-value per action: push left or push right)
+- There is no activation on the final layer
+- ReLU is chosen as the activation function due to its simplicity, and works well for value approximation tasks
+
