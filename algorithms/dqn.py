@@ -1,19 +1,19 @@
 """Deep Q-Network on CartPole-v1"""
 
 import gymnasium as gym
+import imageio
 import numpy as np
 import torch
 import torch.nn as nn
-import wandb
-import imageio
 
+import wandb
 from common.buffers import ReplayBuffer
 from common.networks import MLP
 from common.seed import set_seed
 
 # Hyperparameters
 ENV_ID = "CartPole-v1"
-N_EPISODES = 500
+N_EPISODES = 1000
 BATCH_SIZE = 64
 BUFFER_CAPACITY = 10_000
 GAMMA = 0.99
@@ -21,7 +21,7 @@ LR = 1e-3
 EPSILON_START = 1.0
 EPSILON_END = 0.01
 EPSILON_DECAY = 0.995
-TARGET_UPDATE_FREQ = 10
+TARGET_UPDATE_FREQ = 20
 SEED = 1607
 
 def save_gif(net: nn.Module, seed: int, episode: int, device: torch.device) -> None:
@@ -78,6 +78,7 @@ def _update(
     loss = nn.functional.mse_loss(current_q, target_q) # The mean squared error between predicted and target Q-values
     optimiser.zero_grad()
     loss.backward() # Backpropagate
+    torch.nn.utils.clip_grad_norm_(online_net.parameters(), max_norm=10.0) # Gradient clipping to prevent 'catastrophic forgetting'
     optimiser.step() # Update network using computed gradients
 
     return loss.item()
@@ -190,6 +191,10 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
         # Every TARGET_UPDATE_FREQ episodes, update the target network
         if episode % TARGET_UPDATE_FREQ == 0:
             target_net.load_state_dict(online_net.state_dict())
+
+        # Save GIFs at beginning, middle, and end to see learned progression for only first seed
+        if seed == 42 and episode in (50, N_EPISODES // 2, N_EPISODES - 1):
+            save_gif(online_net, seed=seed, episode=episode, device=device)
 
         # Logging
         recent_rewards.append(total_reward)

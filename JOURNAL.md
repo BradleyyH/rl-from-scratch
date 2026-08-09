@@ -119,5 +119,18 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - While this high variance came unexpected, it is not a sign the algorithm is broken, as seen in the higher reward runs. 
 - Given these results, I will increase N_EPISODES to 1000 to allow for struggling seeds to allow the replay buffer to accumulate more diverse experiences. This reduces the negative impact an unlucky exploration may bring.
 
+### Catastrophic Forgetting
+- After increasing N_EPISODES to 1000, the final mean reward greatly dropped for seed 42. Up until episode 830, the agent learned well, with a rolling mean of 447.6, then suddenly performance collapsed and never recovered.
+- This phenomenon is known in DQN and is called catastrophic forgetting, where the agent rapidly forgets previously learned information upon learning new information. 
+- In this case, the agent was performing well with some exploration, until epsilon hit its minimum and the agent almost entirely stopped exploring. With a few bad experiences, the replay buffer got corrupted and the network started overwriting good Q-values with bad ones, thus getting stuck in a bad policy with no further exploration to recover.
+- However, this was not the case for every seed, where for seed 50, the mean reward improved. This is expected as the collapse is sensitive to the specific sequence of experiences encountered during training.
+- The results from increasing N_EPISODES to 1000 are as follows:
+- Seeds: [42, 50, 100, 1000, 1607]
+- Mean rewards: ['89.2', '167.4', '500.0', '261.9', '96.9']
+- Mean: 223.1, Std:  151.7
+- Seeds that collapsed early enough still had time to partially recover, as exploration continued, but for seed 42 that collapsed late (episode 830), this was not the case.
+
+
+- I will try to minimise this from happening by increased the target update frequency from 10 to 20 for more stable TD targets, and add gradient clipping to prevent large updates from catastrophically overwriting learned weights.
 
 

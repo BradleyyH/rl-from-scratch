@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from algorithms.q_learning import evaluate, train, MAP_SIZE
+from algorithms.q_learning import MAP_SIZE, evaluate, train
 
 SEEDS = [42, 50, 100, 1000, 1607]
 

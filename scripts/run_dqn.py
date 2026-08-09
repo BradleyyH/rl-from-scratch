@@ -31,8 +31,8 @@ def plot_mean_rewards(mean_rewards: np.ndarray) -> None:
 def plot_learning_curves(all_logs: list) -> None:
     """Plot rolling mean reward across all seeds."""
     fig, ax = plt.subplots(figsize=(10, 5))
-    for seed, log in zip(SEEDS, all_logs):
-        episodes, rewards = zip(*log)
+    for seed, log in zip(SEEDS, all_logs, strict=True):
+        episodes, rewards = zip(*log, strict=True)
         ax.plot(episodes, rewards, alpha=0.7, label=f"Seed {seed}")
     ax.set_xlabel("Episode")
     ax.set_ylabel("Rolling mean reward")
@@ -49,7 +49,7 @@ def run_experiments() -> None:
     mean_rewards = []
     all_logs = []
 
-    for i, seed in enumerate(SEEDS):
+    for _i, seed in enumerate(SEEDS):
         print("\n Seed", seed)
         net, rolling_log = train(seed=seed)
         mean_reward = evaluate(net, seed=seed)

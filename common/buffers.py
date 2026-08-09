@@ -1,7 +1,7 @@
 """"Replay buffer for DQN"""
 
-from collections import deque
 import random
+from collections import deque
 
 import numpy as np
 
@@ -19,7 +19,7 @@ class ReplayBuffer:
     def sample(self, batch_size: int) -> tuple:
         """Sample random batch of transitions."""
         batch = random.sample(self.buffer, batch_size)
-        states, actions, rewards, next_states, terminateds = zip(*batch)
+        states, actions, rewards, next_states, terminateds = zip(*batch, strict=True)
         return(
             np.array(states),
             np.array(actions),
