@@ -11,9 +11,9 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 
 ### Q-learning — FrozenLake-v1
 
-![Q-table Heatmap](results/q_learning_heatmap.png)
-![Learning Curves](results/q_learning_learning_curve.png)
-![Success Rates](results/q_learning_success_rates.png)
+<img src="results/q_learning_success_rates.png" width="400"/>
+<img src="results/q_learning_learning_curve.png" width="400"/>
+<img src="results/q_learning_heatmap.png" width="400"/>
 
 #### Learning Progression
 | Early (Episode 1,000) | Mid (Episode 50,000) | Final (Episode 99,999) |
@@ -22,8 +22,8 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 
 ### DQN — CartPole-v1
 
-![Learning Curves](results/dqn_learning_curves.png)
 ![Mean Rewards](results/dqn_mean_rewards.png)
+![Learning Curves](results/dqn_learning_curves.png)
 
 #### Learning Progression
 | Early (Episode 50)                           | Mid (Episode 500) | Best Policy Learned                            |
