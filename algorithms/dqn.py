@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import wandb
+import imageio
 
 from common.buffers import ReplayBuffer
 from common.networks import MLP
@@ -22,6 +23,28 @@ EPSILON_END = 0.01
 EPSILON_DECAY = 0.995
 TARGET_UPDATE_FREQ = 10
 SEED = 1607
+
+def save_gif(net: nn.Module, seed: int, episode: int, device: torch.device) -> None:
+    """Save a GIF of an episode using the current network."""
+    env = gym.make(ENV_ID, render_mode="rgb_array")
+    state, _ = env.reset(seed=seed)
+    frames = []
+    done = False
+
+    while not done:
+        frames.append(env.render())
+        with torch.no_grad():
+            state_tensor = torch.FloatTensor(state).unsqueeze(0).to(device)
+            action = net(state_tensor).argmax().item()
+        state, _, terminated, truncated, _ = env.step(action)
+        done = terminated or truncated
+
+    frames.append(env.render())
+    env.close()
+
+    path = f"results/dqn_episode_{episode}_seed_{seed}.gif"
+    imageio.mimsave(path, frames, fps=30)
+    print(f"Saved GIF: {path}")
 
 def _update(
         online_net: nn.Module,
