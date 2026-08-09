@@ -119,7 +119,7 @@ def train(seed: int = SEED) -> tuple[np.ndarray, list[float]]:
             epsilon = EPSILON_END
 
         # Save GIFs at beginning, middle, and end to see learned progression for only first seed
-        if seed == 42 and episode in (1_000, 50_000, N_EPISODES - 1):
+        if seed == 42 and episode in (1_000, N_EPISODES/2, N_EPISODES - 1):
             save_gif(q_table, seed=seed, episode=episode, epsilon=epsilon)
 
         # Log every 500 episodes to W&B to show progression
