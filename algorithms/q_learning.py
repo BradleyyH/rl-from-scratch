@@ -58,7 +58,7 @@ def train(seed: int = SEED) -> tuple[np.ndarray, list[float]]:
     n_actions = env.action_space.n
     q_table = np.zeros((n_states, n_actions))
 
-    # Initialise W&B - Trace every result back to its exact configuration
+    # Initialise W&B so every result can be traced back to its exact configuration
     wandb.init(
         project="rl-from-scratch",
         name=f"q-learning-seed-{seed}",
@@ -119,7 +119,7 @@ def train(seed: int = SEED) -> tuple[np.ndarray, list[float]]:
             epsilon = EPSILON_END
 
         # Save GIFs at beginning, middle, and end to see learned progression for only first seed
-        if seed == 42 and episode in (1_000, 50_000, N_EPISODES - 1):
+        if seed == 42 and episode in (1_000, N_EPISODES/2, N_EPISODES - 1):
             save_gif(q_table, seed=seed, episode=episode, epsilon=epsilon)
 
         # Log every 500 episodes to W&B to show progression
