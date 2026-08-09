@@ -160,7 +160,7 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
     recent_rewards = []
     rolling_log = []
     best_net = None # Use for final evaluation
-    best_rolling_mean = 0.0
+    best_eval_mean = 0.0
 
     for episode in range(N_EPISODES):
         state, _ = env.reset(seed=seed + episode)
@@ -218,9 +218,10 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
             })
             rolling_log.append((episode, float(np.mean(recent_rewards))))
 
-            # Update best rolling mean
-            if np.mean(recent_rewards) > best_rolling_mean:
-                best_rolling_mean = float(np.mean(recent_rewards))
+            # Checkpoint on greedy eval performance
+            eval_mean_reward = evaluate(online_net, seed=seed)
+            if eval_mean_reward > best_eval_mean:
+                best_eval_mean = eval_mean_reward
                 best_net = copy.deepcopy(online_net)
 
     env.close()
