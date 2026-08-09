@@ -136,5 +136,35 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 ### Updated Results and Final Improvement
 - For seed 42, this fix helped substantially, raising from a poor mean reward of 89.2 to a much better 345.4. However, this was not the case for all seeds and for seed 50, it dropped from 167.4 to 62.2. 
 - This is a very poor performance, and so motivates the implementation of adding a 'best_net' that will save the best network during training and use that for evaluation, rather than the final network. This is equivalent to early stopping in supervised learning, where we use our peak learned performance rather than any instability that may have arisen in the final network.
+- My first attempt at this used rolling training reward (epsilon-greedy), but this failed as early noisy spikes in a small window could permanently outrank later, more stable networks.
+- I plan on fixing this by replacing the rolling mean checkpointing with periodic greedy evaluation every 50 episodes (n_episodes = 5), to get a low variance, greedy signal.
+- This will increase the runtime, but hopefully greatly improve performance.
 
+### Final DQN Results on CartPole-v1
+#### Hyperparameters
+- N_EPISODES = 1000 , BATCH_SIZE = 64, BUFFER_CAPACITY = 50_000
+- GAMMA = 0.99, LR = 1e-3, EPSILON_START = 1.0, EPSILON_END = 0.01
+- EPSILON_DECAY = 0.995 , TARGET_UPDATE_FREQ = 20
+- Gradient clipping: max_norm = 10
+- Best network selected via periodic greedy evaluation every 50 episodes
+
+#### Results
+- Seeds: [42, 50, 100, 1000, 1607]
+- Mean rewards: 500.0, 500.0, 500.0, 500.0, 316.0
+- Mean: 463.2, Std: 73.6
+- 4 out of the 5 seeds achieved the maximum possible reward of 500
+
+#### Analysis
+- These final results are very strong, with 4/5 seeds achieving the maximum possible reward.
+- Seed 1607 underperformed at 316.0, likely due to unlucky exploration early on.
+- The standard deviation of 73.6 is a reflection of the outlier seed
+- We cannot guarantee universal performance, but this consistent maximum reward across the first four seeds strongly suggested a learned policy.
+
+#### Lessons Learned
+- Vanilla DQN is prone to the phenomenon known as catastrophic forgetting when epsilon reaches its minimum, and the agent stops exploring with bad experiences corrupting the policy
+- Three fixes were required to achieve the final performance:
+1. A larger replay buffer, 10,000 to 50,000, allowed the agent to learn from a more diverse set of experiences, reducing the chance of overwriting good policies with bad ones.
+2. Adding gradient clipping prevented large updates from overwriting learned weights. This was necessary as catastrophic forgetting was clearly evident in the rolling mean reward curves, where the agent peaked, and then suddenly collapsed.
+3. Periodic greedy checkpointing every 50 episodes selected the best network rather than using noisy training rewards.
+- This checkpoint fix appeared the most impactful, boosting an average score of ~200 up to 500 for most seeds. More specifically, our worst performing seed 42 from 195.2 to 500.
 
