@@ -88,7 +88,7 @@ def evaluate(net: nn.Module, seed: int = SEED, n_episodes: int = 10) -> float:
     return float(mean_reward)
 
 
-def train(seed: int = SEED) -> nn.Module:
+def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
     """Train DQN agent on CartPole."""
     set_seed(seed)
 
@@ -132,6 +132,7 @@ def train(seed: int = SEED) -> nn.Module:
 
     epsilon = EPSILON_START
     recent_rewards = []
+    rolling_log = []
 
     for episode in range(N_EPISODES):
         state, _ = env.reset(seed=seed + episode)
@@ -183,13 +184,14 @@ def train(seed: int = SEED) -> nn.Module:
                 "epsilon": epsilon,
                 "rolling_mean_reward": np.mean(recent_rewards)
             })
+            rolling_log.append((episode, float(np.mean(recent_rewards))))
 
     env.close()
     mean_reward = evaluate(online_net, seed=seed)
     wandb.log({"eval_mean_reward": mean_reward})
     wandb.finish()
-    return online_net
+    return online_net, rolling_log
 
 if __name__ == "__main__":
-    net = train(seed=SEED)
+    net, rolling_log = train(seed=SEED)
     evaluate(net, seed=SEED)
