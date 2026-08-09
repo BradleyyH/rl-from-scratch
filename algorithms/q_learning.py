@@ -58,7 +58,7 @@ def train(seed: int = SEED) -> tuple[np.ndarray, list[float]]:
     n_actions = env.action_space.n
     q_table = np.zeros((n_states, n_actions))
 
-    # Initialise W&B - Trace every result back to its exact configuration
+    # Initialise W&B so every result can be traced back to its exact configuration
     wandb.init(
         project="rl-from-scratch",
         name=f"q-learning-seed-{seed}",

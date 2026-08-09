@@ -1,1 +1,124 @@
-"""Deep Q-Network."""
+"""Deep Q-Network on CartPole-v1"""
+
+import gymnasium as gym
+import numpy as np
+import torch
+import torch.nn as nn
+import wandb
+
+from common.buffers import ReplayBuffer
+from common.networks import MLP
+from common.seed import set_seed
+
+# Hyperparameters
+ENV_ID = "CartPole-v1"
+N_EPISODES = 500
+BATCH_SIZE = 64
+BUFFER_CAPACITY = 10_000
+GAMMA = 0.99
+LR = 1e-3
+EPSILON_START = 1.0
+EPSILON_END = 0.01
+EPSILON_DECAY = 0.995
+TARGET_UPDATE_FREQ = 10
+SEED = 1607
+
+def train(seed: int = SEED) -> nn.Module:
+    """Train DQN agent on CartPole."""
+    set_seed(seed)
+
+    env = gym.make(ENV_ID)
+    env.action_space.seed(seed)
+    set_seed(seed, env)
+
+    state_dim = env.observation_space.shape[0] # For this env there are 4
+    action_dim = env.action_space.n # For this env, 2
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    online_net = MLP(state_dim, action_dim).to(device)
+    target_net = MLP(state_dim, action_dim).to(device)
+    target_net.load_state_dict(online_net.state_dict())
+    target_net.eval()  # Target network is never trained directly
+
+    # Replay buffer and optimiser initialisation
+    buffer = ReplayBuffer(BUFFER_CAPACITY)
+    optimiser = torch.optim.Adam(online_net.parameters(), lr=LR) # Using Adam optimisation algorithm
+
+    # Initialise W&B so every result can be traced back to its exact configuration
+    wandb.init(
+        project="rl-from-scratch",
+        name=f"dqn-seed-{seed}",
+        reinit="finish_previous",
+        config={
+            "algorithm": "DQN",
+            "env": ENV_ID,
+            "seed": seed,
+            "batch_size": BATCH_SIZE,
+            "buffer_capacity": BUFFER_CAPACITY,
+            "gamma": GAMMA,
+            "lr": LR,
+            "epsilon_start": EPSILON_START,
+            "epsilon_end": EPSILON_END,
+            "epsilon_decay": EPSILON_DECAY,
+            "target_update_freq": TARGET_UPDATE_FREQ,
+            "n_episodes": N_EPISODES,
+        }
+    )
+
+    epsilon = EPSILON_START
+    recent_rewards = []
+
+    for episode in range(N_EPISODES):
+        state, _ = env.reset(seed=seed + episode)
+        done = False
+        total_reward = 0
+
+        while not done:
+        # Epsilon-greedy action selection
+        if np.random.random() < epsilon:
+            action = env.action_space.sample()
+        else:
+            with torch.no_grad():
+                state_tensor = torch.FloatTensor(state).unsqueeze(0).to(device)
+                action = online_net(state_tensor).argmax().item()
+
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+
+            # Store transition in replay buffer
+            buffer.push(state, action, float(reward), next_state, terminated)
+
+            state = next_state
+            total_reward += reward
+
+            # Train when the buffer has enough transitions
+            if len(buffer) >= BATCH_SIZE:
+                _update(online_net, target_net, buffer, optimiser, device)
+
+        # Decay epsilon
+        epsilon = max(EPSILON_END, epsilon * EPSILON_DECAY)
+
+        # Every TARGET_UPDATE_FREQ episodes, update the target network
+        if episode % TARGET_UPDATE_FREQ == 0:
+            target_net.load_state_dict(online_net.state_dict())
+
+        # Logging
+        recent_rewards.append(total_reward)
+        if len(recent_rewards) > 50:
+            recent_rewards.pop(0)
+
+        if episode % 10 == 0:
+            print(f"Episode {episode}, "
+                  f"Reward: {total_reward}, "
+                  f"Epsilon: {epsilon:.3f}, "
+                  f"Rolling Mean: {np.mean(recent_rewards):.1f}")
+            wandb.log({
+                "episode": episode,
+                "reward": total_reward,
+                "epsilon": epsilon,
+                "rolling_mean_reward": np.mean(recent_rewards)
+            })
+
+    env.close()
+    wandb.finish()
+    return online_net

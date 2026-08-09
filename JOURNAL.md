@@ -13,7 +13,7 @@ This journal logs the decisions made, problems encountered and my solutions to t
 ### Tooling
 - 'ruff' used for linting
 - 'pytest' for testing
-- Weights and Biases used for experiment tracking, to log reward curves, hyperparameters, and GIFS of trained agents
+- Weights and Biases used for experiment tracking, to log reward curves, hyperparameters
 - CI runs 'ruff' and 'pytest' on every push
 
 ### Repo Structure
@@ -69,6 +69,8 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 ### 1.2 DQN Implementation
 - CartPole-v1 chosen as the environment. It has a continuous state space (position, velocity, angle, angular velocity). A Q-table would not be able to represent the infinite possible states.
 - DQN replaces the Q-table with a neural network that approximates the Q-values for any input state.
+- This environment is a classic RL problem where the agent must balance a pole on a cart by only pushing left or right along a line, receiving +1 reward for every second the pole remains upright.
+- The episode ends if: the pole angle exceeds 12 degrees, the cart moves out of bounds, or 500 steps are reached. Thus the maximum reward per episode and goal for this task is 500.
 - There are two additions over Q-learning that make it more stable:
 1. A replay buffer that stores past transitions and samples random batches to break correlation between consecutive updates.
 2. A target network which is a frozen copy of the online network updated every N steps. This stabilises TD targets during training.
@@ -81,9 +83,22 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 
 ### Neural network
 - Implemented a multi-layer perceptron for Q-value approximation
-- It follows: input -> 128 -> 128 -> output, with ReLU activations between hidden layers.
+- It follows: 4 inputs -> 128 -> 128 -> 2 outputs, with ReLU activations between hidden layers, with no activation function on the output layer.
 - The input dimension sizes is 4 (CartPole state: position, velocity, angle, angular velocity)
 - The output dimension size is 2 (one Q-value per action: push left or push right)
-- There is no activation on the final layer
 - ReLU is chosen as the activation function due to its simplicity, and works well for value approximation tasks
+- This is stored inside common/ to reuse in later algorithm files.
+
+### Design Choices
+- I have used two identical networks:
+1. An online network which is updated every step via gradient descent
+2. A target network that keeps a frozen copy, and is updated every 10 episodes
+- The target network should stabilise TD targets during training. Without it, the target would change after every step and make learning unstable.
+- I am using Adam optimiser as it is a standard choice for DQN, adapting the learning rate per parameter and is less sensitive to the learning rate hyperparameter, compared to other optimisation algorithms like Stochastic Gradient Descent (SGD)
+- In DQN, the epsilon decay is multiplication, unlike in Q-learning where it was linear. This means it will decay faster earlier on, and slower later on, giving more exploitation time once the network has learned something useful.
+
+### Predictions
+- I believe after successful implementation, the agent should be able to consistently reach 450-500 reward per episode once trained. This is because CartPole is a much easier environment than FrozenLake 8x8 slippery.
+- The learning curves will be more stable than in Q-learning.
+- Faster convergence, with hopefully DQN solving this problem within 300 episodes.
 
