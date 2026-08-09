@@ -1,5 +1,7 @@
 """Deep Q-Network on CartPole-v1"""
 
+import copy
+
 import gymnasium as gym
 import imageio
 import numpy as np
@@ -15,7 +17,7 @@ from common.seed import set_seed
 ENV_ID = "CartPole-v1"
 N_EPISODES = 1000
 BATCH_SIZE = 64
-BUFFER_CAPACITY = 10_000
+BUFFER_CAPACITY = 50_000
 GAMMA = 0.99
 LR = 1e-3
 EPSILON_START = 1.0
@@ -24,7 +26,7 @@ EPSILON_DECAY = 0.995
 TARGET_UPDATE_FREQ = 20
 SEED = 1607
 
-def save_gif(net: nn.Module, seed: int, episode: int, device: torch.device) -> None:
+def save_gif(net: nn.Module, seed: int, episode: int | str, device: torch.device) -> None:
     """Save a GIF of an episode using the current network."""
     env = gym.make(ENV_ID, render_mode="rgb_array")
     state, _ = env.reset(seed=seed)
@@ -157,6 +159,8 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
     epsilon = EPSILON_START
     recent_rewards = []
     rolling_log = []
+    best_net = None # Use for final evaluation
+    best_rolling_mean = 0.0
 
     for episode in range(N_EPISODES):
         state, _ = env.reset(seed=seed + episode)
@@ -192,8 +196,8 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
         if episode % TARGET_UPDATE_FREQ == 0:
             target_net.load_state_dict(online_net.state_dict())
 
-        # Save GIFs at beginning, middle, and end to see learned progression for only first seed
-        if seed == 42 and episode in (50, N_EPISODES // 2, N_EPISODES - 1):
+        # Save GIFs at beginning and middle to see learned progression for only first seed
+        if seed == 42 and episode in (50, N_EPISODES // 2):
             save_gif(online_net, seed=seed, episode=episode, device=device)
 
         # Logging
@@ -214,11 +218,21 @@ def train(seed: int = SEED) -> tuple[nn.Module, list[tuple[int, float]]]:
             })
             rolling_log.append((episode, float(np.mean(recent_rewards))))
 
+            # Update best rolling mean
+            if np.mean(recent_rewards) > best_rolling_mean:
+                best_rolling_mean = float(np.mean(recent_rewards))
+                best_net = copy.deepcopy(online_net)
+
     env.close()
-    mean_reward = evaluate(online_net, seed=seed)
+
+    # Save a GIF of the best performing network
+    if seed == 42:
+        save_gif(best_net, seed=seed, episode="best", device=device)
+
+    mean_reward = evaluate(best_net, seed=seed)
     wandb.log({"eval_mean_reward": mean_reward})
     wandb.finish()
-    return online_net, rolling_log
+    return best_net, rolling_log
 
 if __name__ == "__main__":
     net, rolling_log = train(seed=SEED)
