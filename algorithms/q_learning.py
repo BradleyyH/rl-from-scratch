@@ -3,8 +3,8 @@
 import gymnasium as gym
 import imageio
 import numpy as np
-import wandb
 
+import wandb
 from common.seed import set_seed
 
 # Hyperparameters
