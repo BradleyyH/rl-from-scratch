@@ -23,6 +23,7 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 | Early (Episode 1,000) | Mid (Episode 50,000) | Final (Episode 99,999) |
 |----------------------|---------------------|----------------------|
 | ![Early](results/q_learning_episode_1000_seed_42.gif) | ![Mid](results/q_learning_episode_50000_seed_42.gif) | ![Final](results/q_learning_episode_99999_seed_42.gif) |
+> Early agent fails almost immediately, falling into a hole. Mid-trained agent gets further but eventually fails. Final agent successfully finds its way to the goal.
 
 ### DQN — CartPole-v1
 
@@ -37,7 +38,7 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 | Early (Episode 50)                           | Mid (Episode 500) | Best Policy Learned                            |
 |----------------------------------------------|------------------|------------------------------------------------|
 | ![Early](results/dqn_episode_50_seed_42.gif) | ![Mid](results/dqn_episode_500_seed_42.gif) | ![Final](results/dqn_episode_best_seed_42.gif) |
- > Click the gifs to see the algorithm in action
+ > Early agent falls immediately, mid-training agent struggles to balance and moves off screen, final agent balances until episode end.
 
 ## Installation
 
