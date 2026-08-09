@@ -37,7 +37,7 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 | Early (Episode 50)                           | Mid (Episode 500) | Best Policy Learned                            |
 |----------------------------------------------|------------------|------------------------------------------------|
 | ![Early](results/dqn_episode_50_seed_42.gif) | ![Mid](results/dqn_episode_500_seed_42.gif) | ![Final](results/dqn_episode_best_seed_42.gif) |
-
+ > Click the gifs to see the algorithm in action
 
 ## Installation
 
