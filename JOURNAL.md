@@ -25,9 +25,8 @@ This journal logs the decisions made, problems encountered and my solutions to t
 
 Currently reading through 'Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto'
 
-## Phase 1: Algorithm Implementation
 
-### 1.1 Q-Learning
+## Q-Learning Implementation
 - FrozenLake-v1 chosen as the environment, on an 8x8 grid, with 'is_slippery' set to True.
 - Q-learning will be the first algorithm implemented as it requires no neural network, focusing only on the core RL loop (state, action, reward, next state).
 - The Bellman equation defines the optimal Q-table, where the Q-learning update rule moves towards it incrementally using TD error scaled by the learning rate alpha.
@@ -66,7 +65,7 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - A fixed alpha value (α = 0.1) with 100k episodes performed equally or better than all other theoretically motivated alternatives.
 - This motivates the use of function approximation in DQN, which can handle more complex environments.
 
-### 1.2 DQN Implementation
+## DQN Implementation
 - CartPole-v1 chosen as the environment. It has a continuous state space (position, velocity, angle, angular velocity). A Q-table would not be able to represent the infinite possible states.
 - DQN replaces the Q-table with a neural network that approximates the Q-values for any input state.
 - This environment is a classic RL problem where the agent must balance a pole on a cart by only pushing left or right along a line, receiving +1 reward for every second the pole remains upright.
@@ -106,4 +105,19 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - Takes a random batch of 64 transitions to sample from the replay buffer
 - Loss computed as MSE between predicted Q-values and TD targets, backpropagated through the online network
 - Future values zeroes on termination, like done in the Q-learning implementation
+
+### Results on Initial DQN Run
+- Seeds: [42, 50, 100, 1000, 1607]
+- Mean rewards: ['195.2', '101.2', '500.0', '298.3', '422.8']
+- Mean: 303.5, Std:  145.3
+
+- My initial prediction was that DQN would consistently reach the 450-500 reward, but this now appears overconfident.
+- Seed 100 achieved the maximum score of 500, and seed 1607 reaching 422.8. This shows that the algorithm can solve CartPole, but we also see that on seeds 42 and 50 perform significantly worse (195.2 and 101.2).
+- With further research, this variance can be explained and is well documented in DQN due to:
+1. With early random exploration differing per seed, the replay buffer fills with different quality experiences
+2. Some seeds lead the agent into poor early paths that are difficult to recover from in just 500 episodes
+- While this high variance came unexpected, it is not a sign the algorithm is broken, as seen in the higher reward runs. 
+- Given these results, I will increase N_EPISODES to 1000 to allow for struggling seeds to allow the replay buffer to accumulate more diverse experiences. This reduces the negative impact an unlucky exploration may bring.
+
+
 
