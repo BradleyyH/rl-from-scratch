@@ -45,7 +45,7 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - Performance plateau may be attributed to environment stochasticity due to is_slippery=True, (1/3 chance of sliding sideways).
 
 ### Possible Improvements
-- Q-learning's convergence guarantee requires a decaying learning rate (Robbins-Monro conditions). A fixed decay rate here to be chnaged to visit-count based decay α = 1/(1 + N(s,a)).
+- Q-learning's convergence guarantee requires a decaying learning rate (Robbins-Monro conditions). A fixed decay rate here to be changed to visit-count based decay α = 1/(1 + N(s,a)).
 - Further increase episodes due to the difficulty of 8x8 slippery FrozenLake.
 
 ### Visit-Count Learning Rate Second Attempt
@@ -60,8 +60,8 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - From episodes 0-40,000, we see the agent exploring randomly, with the goal rarely found (also seen in the video/gif). From episodes 40,000-80,000, we see a steady improvement as Q-values propagate from goal. Finally from episodes 80,000 to 100,000, we see a convergence at ~57%.
 
 ### Conclusion
-- Despite numerous attempts at tuning hyperparameters, the ceiling for tabular Q-learning on this environment came at around ~62%. With is_slippery=True, the task became stochatic, with a 1/3 chance of sliding sideways, and so even the optimal action fails randomly, creating a hard ceiling.
-- The learning curve shows us that the agent is steadily learning, with performance rising from near zero to ~57%, but platuaus well before the theoretical optimum.
+- Despite numerous attempts at tuning hyperparameters, the ceiling for tabular Q-learning on this environment came at around ~62%. With is_slippery=True, the task became stochastic, with a 1/3 chance of sliding sideways, and so even the optimal action fails randomly, creating a hard ceiling.
+- The learning curve shows us that the agent is steadily learning, with performance rising from near zero to ~57%, but plateaus well before the theoretical optimum.
 - A fixed alpha value (α = 0.1) with 100k episodes performed equally or better than all other theoretically motivated alternatives.
 - This motivates the use of function approximation in DQN, which can handle more complex environments.
 
@@ -137,8 +137,8 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - For seed 42, this fix helped substantially, raising from a poor mean reward of 89.2 to a much better 345.4. However, this was not the case for all seeds and for seed 50, it dropped from 167.4 to 62.2. 
 - This is a very poor performance, and so motivates the implementation of adding a 'best_net' that will save the best network during training and use that for evaluation, rather than the final network. This is equivalent to early stopping in supervised learning, where we use our peak learned performance rather than any instability that may have arisen in the final network.
 - My first attempt at this used rolling training reward (epsilon-greedy), but this failed as early noisy spikes in a small window could permanently outrank later, more stable networks.
-- I plan on fixing this by replacing the rolling mean checkpointing with periodic greedy evaluation every 50 episodes (n_episodes = 5), to get a low variance, greedy signal.
-- This will increase the runtime, but hopefully greatly improve performance.
+- I fixed this by replacing the rolling mean checkpointing with periodic greedy evaluation every 50 episodes (n_episodes = 5), to get a low variance, greedy signal.
+- This increased the runtime, but greatly improved performance.
 
 ### Final DQN Results on CartPole-v1
 #### Hyperparameters
@@ -168,3 +168,8 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 3. Periodic greedy checkpointing every 50 episodes selected the best network rather than using noisy training rewards.
 - This checkpoint fix appeared the most impactful, boosting an average score of ~200 up to 500 for most seeds. More specifically, our worst performing seed 42 from 195.2 to 500.
 
+## Overall Conclusion
+- Successfully implemented two foundational RL algorithms from scratch: tabular Q-learning and DQN, evaluated on FrozenLake-v1 and CartPole-v1 from OpenAI's Gym library, Gymnasium.
+- Q-learning demonstrated the RL loop and Bellman equation, but hit a performance ceiling (~57%) due to the stochasticity of the environment.
+- DQN showed that replacing the Q-table with a neural network, allowed the algorithm to handle continuous state space environments. In my case, achieving a mean reward of 463.2 out of a maximum 500 across 5 seeds.
+- The most valuable lessons throughout came from debugging, especially understanding the results and the potential causes for any unexpected results. The problems I faced throughout this project were well known in the RL community and working through them helped consolidate my understand of these algorithms, beyond what theory alone provided.
