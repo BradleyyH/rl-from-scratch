@@ -17,7 +17,7 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
     <td><img src="results/q_learning_heatmap.png" width="400"/></td>
   </tr>
 </table>
-<td><img src="results/q_learning_learning_curve.png" width="800"/></td>
+<td align="center"><img src="results/q_learning_learning_curve.png" width="400"/></td>
 
 #### Learning Progression
 | Early (Episode 1,000) | Mid (Episode 50,000) | Final (Episode 99,999) |
