@@ -131,6 +131,10 @@ Currently reading through 'Reinforcement Learning: An Introduction by Richard S.
 - Seeds that collapsed early enough still had time to partially recover, as exploration continued, but for seed 42 that collapsed late (episode 830), this was not the case.
 
 
-- I will try to minimise this from happening by increased the target update frequency from 10 to 20 for more stable TD targets, and add gradient clipping to prevent large updates from catastrophically overwriting learned weights.
+- I will try to minimise this from happening by increased the target update frequency from 10 to 20 for more stable TD targets, and add gradient clipping to prevent large updates from catastrophically overwriting learned weights. Also, by increasing the buffer capacity, the agent can learn from a more diverse set of experiences, and will hopefully reduce the chance of overwriting good policies with bad ones.
+
+### Updated Results and Final Improvement
+- For seed 42, this fix helped substantially, raising from a poor mean reward of 89.2 to a much better 345.4. However, this was not the case for all seeds and for seed 50, it dropped from 167.4 to 62.2. 
+- This is a very poor performance, and so motivates the implementation of adding a 'best_net' that will save the best network during training and use that for evaluation, rather than the final network. This is equivalent to early stopping in supervised learning, where we use our peak learned performance rather than any instability that may have arisen in the final network.
 
 
