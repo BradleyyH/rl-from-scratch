@@ -19,6 +19,7 @@ jobs:
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dev]"
+          pip install ruff==0.15.16
 
       - name: Lint with ruff
         run: ruff check .
