@@ -59,7 +59,33 @@ def _update(
 
     return loss.item()
 
+def evaluate(net: nn.Module, seed: int = SEED, n_episodes: int = 10) -> float:
+    """Evaluate the trained agent greedily over n episodes, returning mean reward."""
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    env = gym.make(ENV_ID)
+    set_seed(seed, env)
+    env.action_space.seed(seed)
 
+    total_rewards = []
+    for i in range(n_episodes):
+        state, _ = env.reset(seed=seed + i) # Different start per episode
+        done = False
+        episode_reward = 0
+
+        while not done:
+            with torch.no_grad():
+                state_tensor = torch.FloatTensor(state).unsqueeze(0).to(device)
+                action = net(state_tensor).argmax().item() # Take action with highest Q-value (greedy)
+            state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+            episode_reward += reward
+
+        total_rewards.append(episode_reward)
+
+    env.close()
+    mean_reward = np.mean(total_rewards)
+    print(f"Mean reward: {mean_reward:.1f} over {n_episodes} episodes")
+    return float(mean_reward)
 
 
 def train(seed: int = SEED) -> nn.Module:
@@ -159,5 +185,11 @@ def train(seed: int = SEED) -> nn.Module:
             })
 
     env.close()
+    mean_reward = evaluate(online_net, seed=seed)
+    wandb.log({"eval_mean_reward": mean_reward})
     wandb.finish()
     return online_net
+
+if __name__ == "__main__":
+    net = train(seed=SEED)
+    evaluate(net, seed=SEED)
