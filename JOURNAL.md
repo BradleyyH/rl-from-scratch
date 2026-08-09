@@ -3,8 +3,6 @@ This journal logs the decisions made, problems encountered and my solutions to t
 
 ---
 
-## Phase 0 Setup
-
 ### Environment
 - Developed using Python 3.13 for support with ROCm 6.4, setup in a '.venv' virtual environment
 - torch excluded from 'pyproject.toml' dependencies as needs to be manually installed for appropriate GPU
