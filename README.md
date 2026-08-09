@@ -17,7 +17,7 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
     <td><img src="results/q_learning_heatmap.png" width="400"/></td>
   </tr>
 </table>
-<td align="center"><img src="results/q_learning_learning_curve.png" width="400"/></td>
+<td><img src="results/q_learning_learning_curve.png" width="600"/></td>
 
 #### Learning Progression
 | Early (Episode 1,000) | Mid (Episode 50,000) | Final (Episode 99,999) |
@@ -26,8 +26,12 @@ Tabular Q-learning and DQN implemented from first principles in PyTorch, evaluat
 
 ### DQN — CartPole-v1
 
-![Mean Rewards](results/dqn_mean_rewards.png)
-![Learning Curves](results/dqn_learning_curves.png)
+<table>
+  <tr>
+    <td align="center"><img src="results/dqn_mean_rewards.png" width="400"/></td>
+    <td align="center"><img src="results/dqn_learning_curves.png" width="400"/></td>
+  </tr>
+</table>
 
 #### Learning Progression
 | Early (Episode 50)                           | Mid (Episode 500) | Best Policy Learned                            |
